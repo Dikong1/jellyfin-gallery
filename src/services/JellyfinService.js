@@ -21,6 +21,7 @@ export const JellyfinService = {
 
   async getViews() {
     const r = await api.get(`/Users/${userId}/Views`)
+    console.log('Views:', r.data)
     return r.data // list of views/libraries
   },
 
