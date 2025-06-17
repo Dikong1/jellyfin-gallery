@@ -11,13 +11,19 @@
       toggle-color="primary"
       class="q-mb-md"
       :options="[
-        { label: 'Grid', value: 'grid', icon: 'grid_view' },
-        { label: 'List', value: 'list', icon: 'view_list' },
+        { label: 'Сетка', value: 'grid', icon: 'grid_view' },
+        { label: 'Список', value: 'list', icon: 'view_list' },
       ]"
     />
 
     <!-- Search Bar -->
-    <q-input v-model="search" label="Search videos..." dense debounce="300" class="q-mb-md" />
+    <q-input
+      v-model="search"
+      label="Поиск по выбранной папке..."
+      dense
+      debounce="300"
+      class="q-mb-md"
+    />
 
     <!-- Views Cards -->
     <div class="row q-col-gutter-md q-mb-md">

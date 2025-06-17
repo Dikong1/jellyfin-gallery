@@ -1,3 +1,4 @@
+// src/services/JellyfinService.js
 import { api } from 'boot/axios'
 
 const deviceId = 'quasar-client-001'
@@ -22,7 +23,7 @@ export const JellyfinService = {
   async getViews() {
     const r = await api.get(`/Users/${userId}/Views`)
     console.log('Views:', r.data)
-    return r.data // list of views/libraries
+    return r.data // contains .Items[]
   },
 
   async getItemsByParent(parentId, types = 'Video,Audio') {
@@ -44,6 +45,7 @@ export const JellyfinService = {
 
     return `${host}/Items/${item.Id}/Images/${type}?tag=${tag}&quality=90&X-MediaBrowser-Token=${token}`
   },
+
   getStreamUrl(itemId) {
     return `${host}/Videos/${itemId}/stream?static=true&X-MediaBrowser-Token=${token}`
   },

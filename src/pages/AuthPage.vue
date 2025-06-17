@@ -1,15 +1,25 @@
 <template>
   <q-page class="q-pa-md flex flex-center column q-gutter-md">
-    <q-card class="q-pa-lg" style="width: 300px">
-      <q-card-section class="text-h6">Login</q-card-section>
+    <q-card class="q-pa-lg shadow-3 rounded-borders bg-white" style="width: 320px">
+      <q-card-section class="text-center q-pb-none">
+        <q-avatar size="56px" class="q-mb-sm">
+          <q-icon name="photo_album" />
+        </q-avatar>
+        <div class="text-h6">Welcome to Jellyfin</div>
+        <div class="text-caption text-grey-7">Sign in to continue</div>
+      </q-card-section>
 
-      <q-card-section class="q-gutter-md">
-        <q-input v-model="username" label="Username" outlined />
-        <q-input v-model="password" label="Password" type="password" outlined />
-        <q-btn :loading="media.loading" label="Login" color="primary" @click="login" />
-        <q-banner v-if="media.error" dense class="bg-red text-white">
-          {{ media.error }}
-        </q-banner>
+      <q-card-section class="q-gutter-md q-pt-md">
+        <q-input v-model="username" label="Username" filled />
+        <q-input v-model="password" type="password" label="Password" filled />
+        <q-btn
+          :loading="media.loading"
+          label="Login"
+          color="primary"
+          unelevated
+          class="full-width"
+          @click="login"
+        />
       </q-card-section>
     </q-card>
   </q-page>
