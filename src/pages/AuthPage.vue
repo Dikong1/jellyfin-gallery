@@ -1,6 +1,10 @@
 <template>
   <q-page class="q-pa-md flex flex-center column q-gutter-md">
-    <q-card class="q-pa-lg shadow-3 rounded-borders bg-white" style="width: 320px">
+    <q-card
+      class="q-pa-lg shadow-3 rounded-borders"
+      :class="$q.dark.isActive ? 'bg-grey-9 text-white' : 'bg-white'"
+      style="width: 320px"
+    >
       <q-card-section class="text-center q-pb-none">
         <q-avatar size="56px" class="q-mb-sm">
           <q-icon name="photo_album" />
@@ -10,8 +14,14 @@
       </q-card-section>
 
       <q-card-section class="q-gutter-md q-pt-md">
-        <q-input v-model="username" label="Username" filled />
-        <q-input v-model="password" type="password" label="Password" filled />
+        <q-input v-model="username" label="Username" filled :dark="$q.dark.isActive" />
+        <q-input
+          v-model="password"
+          type="password"
+          label="Password"
+          filled
+          :dark="$q.dark.isActive"
+        />
         <q-btn
           :loading="media.loading"
           label="Login"

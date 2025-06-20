@@ -1,4 +1,3 @@
-// src/services/JellyfinService.js
 import { api } from 'boot/axios'
 
 const deviceId = 'quasar-client-001'
@@ -22,7 +21,6 @@ export const JellyfinService = {
 
   async getViews() {
     const r = await api.get(`/Users/${userId}/Views`)
-    console.log('Views:', r.data)
     return r.data // contains .Items[]
   },
 
@@ -31,6 +29,29 @@ export const JellyfinService = {
       params: { ParentId: parentId, IncludeItemTypes: types, Recursive: true },
     })
     return r.data.Items
+  },
+
+  async getFolderItemsAdvanced({
+    parentId,
+    startIndex = 0,
+    limit = 100,
+    sortBy = ['IsFolder', 'SortName'],
+    sortOrder = 'Descending',
+    fields = ['PrimaryImageAspectRatio', 'SortName', 'Path', 'ChildCount', 'MediaSourceCount'],
+    imageTypeLimit = 1,
+  }) {
+    const r = await api.get(`/Users/${userId}/Items`, {
+      params: {
+        ParentId: parentId,
+        StartIndex: startIndex,
+        Limit: limit,
+        Fields: fields.join(','),
+        ImageTypeLimit: imageTypeLimit,
+        SortBy: sortBy.join(','),
+        SortOrder: sortOrder,
+      },
+    })
+    return r.data
   },
 
   async getPlaylistItems(playlistId) {

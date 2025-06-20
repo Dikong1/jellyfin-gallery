@@ -1,5 +1,5 @@
 <template>
-  <div class="q-pa-md">
+  <div class="q-pa-md" :class="$q.dark.isActive ? 'bg-grey-10 text-white' : 'bg-white text-black'">
     <!-- Error Banner -->
     <q-banner v-if="media.error" dense class="bg-red text-white q-mb-md">
       {{ media.error }}
@@ -37,69 +37,64 @@
       </div>
     </div>
 
-    <!-- Pagination Control -->
-    <q-pagination
-      v-if="pageCount > 1"
-      v-model="page"
-      :max="pageCount"
-      max-pages="5"
-      boundary-numbers
-      direction-links
-      class="q-mb-md"
-      color="primary"
-    />
-
     <!-- Media Items Display -->
     <div v-if="media.loading">
       <q-skeleton type="rect" height="200px" v-for="i in 6" :key="i" class="q-mb-md" />
     </div>
 
-    <div v-if="layout === 'grid'" class="row q-col-gutter-md">
-      <div v-for="it in pagedItems" :key="it.Id" class="col-12 col-sm-6 col-md-4 col-lg-3">
-        <q-card class="hover-scale" clickable @click="openVideo(it.Id)">
-          <div style="position: relative">
-            <img
-              :src="media.getImageUrl(it)"
-              :alt="it.Name"
-              class="full-width"
-              style="aspect-ratio: 16 / 9; object-fit: cover"
-            />
-            <div class="absolute-bottom q-pa-sm text-white bg-black bg-opacity-50">
-              <q-icon name="play_circle" size="24px" class="q-mr-sm" />
-              {{ it.Name }}
+    <q-infinite-scroll v-if="folderId" @load="loadMore" :offset="100" :disable="noMoreItems">
+      <div v-if="layout === 'grid'" class="row q-col-gutter-md">
+        <div v-for="it in filteredItems" :key="it.Id" class="col-12 col-sm-6 col-md-4 col-lg-3">
+          <q-card class="hover-scale" clickable @click="openVideo(it.Id)">
+            <div style="position: relative">
+              <img
+                :src="media.getImageUrl(it)"
+                :alt="it.Name"
+                class="full-width"
+                style="aspect-ratio: 16 / 9; object-fit: cover"
+              />
+              <div
+                class="absolute-bottom q-pa-sm"
+                :class="
+                  $q.dark.isActive ? 'bg-grey-9 text-white' : 'bg-black text-white bg-opacity-50'
+                "
+              >
+                <q-icon name="play_circle" size="24px" class="q-mr-sm" />
+                {{ it.Name }}
+              </div>
+              <q-linear-progress
+                v-if="hasSavedProgress(it.Id)"
+                :value="getSavedProgress(it.Id)"
+                color="accent"
+                size="xs"
+                class="absolute-bottom"
+              />
             </div>
-            <q-linear-progress
-              v-if="hasSavedProgress(it.Id)"
-              :value="getSavedProgress(it.Id)"
-              color="accent"
-              size="xs"
-              class="absolute-bottom"
-            />
-          </div>
-        </q-card>
+          </q-card>
+        </div>
       </div>
-    </div>
 
-    <div v-else>
-      <q-list bordered>
-        <q-item v-for="it in pagedItems" :key="it.Id" clickable @click="openVideo(it.Id)">
-          <q-item-section avatar>
-            <img
-              :src="media.getImageUrl(it)"
-              :alt="it.Name"
-              class="full-width"
-              style="aspect-ratio: 16 / 9; object-fit: cover; max-width: 120px"
-            />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>{{ it.Name }}</q-item-label>
-          </q-item-section>
-          <q-item-section side v-if="hasSavedProgress(it.Id)">
-            <q-linear-progress :value="getSavedProgress(it.Id)" color="accent" size="xs" />
-          </q-item-section>
-        </q-item>
-      </q-list>
-    </div>
+      <div v-else>
+        <q-list :dark="$q.dark.isActive" bordered>
+          <q-item v-for="it in filteredItems" :key="it.Id" clickable @click="openVideo(it.Id)">
+            <q-item-section avatar>
+              <img
+                :src="media.getImageUrl(it)"
+                :alt="it.Name"
+                class="full-width"
+                style="aspect-ratio: 16 / 9; object-fit: cover; max-width: 120px"
+              />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>{{ it.Name }}</q-item-label>
+            </q-item-section>
+            <q-item-section side v-if="hasSavedProgress(it.Id)">
+              <q-linear-progress :value="getSavedProgress(it.Id)" color="accent" size="xs" />
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </div>
+    </q-infinite-scroll>
 
     <!-- Fullscreen Video Player -->
     <div v-if="selectedVideoUrl" class="fullscreen-video-wrapper">
@@ -125,23 +120,42 @@ import { useRouter } from 'vue-router'
 import { getAuth, clearAuth } from 'src/utils/auth'
 
 const router = useRouter()
-
 const search = ref('')
 const layout = ref('grid')
 const selectedVideoUrl = ref(null)
 const selectedVideoId = ref(null)
 const media = useMediaStore()
 const videoRef = ref(null)
-
-const page = ref(1)
-const perPage = 8
+const folderId = ref(null)
+const loadedPages = ref(0)
+const allItems = ref([])
+const noMoreItems = ref(false)
 
 const VOLUME_KEY = 'jellyfin-player-volume'
 const PROGRESS_KEY = (id) => `jellyfin-progress-${id}`
 
 function selectView(viewId) {
-  media.selectView(viewId)
-  page.value = 1 // reset page on view change
+  folderId.value = viewId
+  loadedPages.value = 0
+  allItems.value = []
+  noMoreItems.value = false
+  loadMore()
+}
+
+async function loadMore(done) {
+  if (media.loading || noMoreItems.value) return
+  const pageSize = media.perPage
+  const nextPage = loadedPages.value + 1
+
+  const result = await media.loadFolderItemsPaged(folderId.value, nextPage, pageSize)
+  if (result?.Items?.length > 0) {
+    allItems.value.push(...result.Items)
+    loadedPages.value++
+    if (allItems.value.length >= result.TotalRecordCount) noMoreItems.value = true
+  } else {
+    noMoreItems.value = true
+  }
+  done?.()
 }
 
 function openVideo(id) {
@@ -197,13 +211,9 @@ function getSavedProgress(id) {
 }
 
 const filteredItems = computed(() => {
-  return media.items.filter((item) => item.Name.toLowerCase().includes(search.value.toLowerCase()))
-})
-
-const pageCount = computed(() => Math.ceil(filteredItems.value.length / perPage))
-const pagedItems = computed(() => {
-  const start = (page.value - 1) * perPage
-  return filteredItems.value.slice(start, start + perPage)
+  return allItems.value.filter((item) =>
+    item.Name.toLowerCase().includes(search.value.toLowerCase()),
+  )
 })
 
 function handleKeyboard(e) {
@@ -220,7 +230,6 @@ function handleKeyboard(e) {
 
 onMounted(async () => {
   document.addEventListener('keydown', handleKeyboard)
-
   const creds = getAuth()
   if (!creds) return router.push('/auth')
 

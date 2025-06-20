@@ -15,11 +15,26 @@
         </q-avatar>
         <q-toolbar-title>Jellyfin Gallery</q-toolbar-title>
         <q-space />
+        <q-toggle
+          v-model="$q.dark.isActive"
+          checked-icon="dark_mode"
+          unchecked-icon="light_mode"
+          class="q-ml-md"
+          size="sm"
+          :label="$q.dark.isActive ? 'Dark' : 'Light'"
+          dense
+        />
         <q-btn v-if="showDrawer" flat icon="logout" @click="logout" />
       </q-toolbar>
     </q-header>
 
-    <q-drawer v-if="showDrawer" v-model="leftDrawerOpen" show-if-above bordered>
+    <q-drawer
+      v-if="showDrawer"
+      v-model="leftDrawerOpen"
+      show-if-above
+      bordered
+      :class="$q.dark.isActive ? 'bg-grey-9 text-white' : 'bg-white text-black'"
+    >
       <q-list>
         <q-item-label header>Navigation</q-item-label>
         <q-item to="/gallery" exact clickable v-ripple>
@@ -54,11 +69,13 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useMediaStore } from 'src/stores/useMediaStore'
 import { getAuth, clearAuth } from 'src/utils/auth'
+import { useQuasar } from 'quasar'
 
+const $q = useQuasar()
 const leftDrawerOpen = ref(false)
 const media = useMediaStore()
 const router = useRouter()
@@ -67,6 +84,9 @@ const route = useRoute()
 const showDrawer = computed(() => route.path !== '/auth')
 
 onMounted(async () => {
+  const saved = localStorage.getItem('dark')
+  $q.dark.set(saved !== 'false')
+
   const auth = getAuth()
   if (!auth && route.path !== '/auth') return router.push('/auth')
 
@@ -77,6 +97,13 @@ onMounted(async () => {
     router.push('/auth')
   }
 })
+
+watch(
+  () => $q.dark.isActive,
+  (val) => {
+    localStorage.setItem('dark', val)
+  },
+)
 
 function logout() {
   clearAuth()

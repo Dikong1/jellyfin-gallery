@@ -1,5 +1,8 @@
 <template>
-  <q-page class="q-pa-md">
+  <q-page
+    class="q-pa-md"
+    :class="$q.dark.isActive ? 'bg-grey-10 text-white' : 'bg-white text-dark'"
+  >
     <q-separator spaced />
     <div class="text-h5 text-weight-medium q-mb-md">Медиа в {{ viewName || 'Галерее' }}</div>
 
@@ -36,6 +39,16 @@
         </q-card>
       </div>
     </div>
+
+    <q-banner
+      v-if="!media.loading && items.length === 0"
+      class="q-mt-lg text-center"
+      :class="$q.dark.isActive ? 'bg-grey-8 text-white' : 'bg-grey-3 text-dark'"
+    >
+      <q-icon name="mood_bad" size="md" class="q-mb-sm" />
+      <div>Не найдены элементы в плэйлисте</div>
+    </q-banner>
+
     <iframe
       src="http://localhost:8096/web/#/home.html"
       frameborder="0"
@@ -45,13 +58,6 @@
       allowfullscreen
     ></iframe>
   </q-page>
-  <q-banner
-    v-if="!media.loading && items.length === 0"
-    class="bg-grey-3 text-dark q-pa-md q-mb-md text-center"
-  >
-    <q-icon name="mood_bad" size="md" class="q-mb-sm" />
-    <div>Не найдены элементы в плэйлисте</div>
-  </q-banner>
 </template>
 
 <script setup>
