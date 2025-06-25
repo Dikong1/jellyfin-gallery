@@ -33,5 +33,4 @@ yarn-error.log*
 .env.local*
 
 #docker
-jellyfin_front.tar
-jellyfin.tar
+*.tar
