@@ -1,0 +1,14 @@
+services:
+  app:
+    image: jellyfin-gallery:1.0.0
+    container_name: frontend
+
+    command: ['quasar', 'dev']
+    ports:
+      - '9000:9000'
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:
+    driver: bridge

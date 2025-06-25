@@ -53,8 +53,8 @@ async function login() {
     saveAuth(username.value, password.value)
     router.push('/gallery')
   } catch (err) {
-    media.error = 'Login failed' + (err.message ? `: ${err.message}` : '')
-    console.error('Login error:', err)
+    media.error = 'Login failed: ' + (err.message ? `: ${err.message}` : '')
+    console.error('Login error: ', err)
   }
 }
 </script>

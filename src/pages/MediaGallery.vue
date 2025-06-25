@@ -130,6 +130,7 @@ const folderId = ref(null)
 const loadedPages = ref(0)
 const allItems = ref([])
 const noMoreItems = ref(false)
+// const showSkeletons = ref(false)
 
 const VOLUME_KEY = 'jellyfin-player-volume'
 const PROGRESS_KEY = (id) => `jellyfin-progress-${id}`
