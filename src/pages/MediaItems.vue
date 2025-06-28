@@ -48,15 +48,6 @@
       <q-icon name="mood_bad" size="md" class="q-mb-sm" />
       <div>Не найдены элементы в плэйлисте</div>
     </q-banner>
-
-    <iframe
-      src="http://localhost:8096/web/#/home.html"
-      frameborder="0"
-      title="Jellyfin Home"
-      class="q-mt-md"
-      style="width: 100%; height: 600px; border: none"
-      allowfullscreen
-    ></iframe>
   </q-page>
 </template>
 

@@ -70,4 +70,35 @@ export const JellyfinService = {
   getStreamUrl(itemId) {
     return `${host}/Videos/${itemId}/stream?static=true&X-MediaBrowser-Token=${token}`
   },
+
+  async searchItems(term, limit = 100) {
+    const r = await api.get('/Items', {
+      params: {
+        userId,
+        recursive: true,
+        searchTerm: term,
+        includeItemTypes: 'Movie',
+        fields: 'PrimaryImageAspectRatio,CanDelete,MediaSourceCount',
+        imageTypeLimit: 1,
+        enableTotalRecordCount: false,
+        limit,
+      },
+    })
+    return r.data.Items
+  },
+
+  async getItemById(itemId) {
+    const r = await api.get(`/Users/${userId}/Items/${itemId}`)
+    return r.data
+  },
+  async updateUserData(itemId, data) {
+    // userId and token are already set after authentication
+    const r = await api.post(`/UserItems/${itemId}/UserData`, {
+      ...data,
+      ItemId: itemId,
+      Key: itemId,
+      UserId: userId,
+    })
+    return r.data
+  },
 }

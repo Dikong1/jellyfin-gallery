@@ -1,4 +1,3 @@
-// src/stores/useMediaStore.js
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { JellyfinService } from 'src/services/JellyfinService'
@@ -6,9 +5,11 @@ import { JellyfinService } from 'src/services/JellyfinService'
 export const useMediaStore = defineStore('media', () => {
   const views = ref([]) // library views
   const items = ref([]) // media items in current page
-  const totalItems = ref(0) // total items in selected view
+  const totalItems = ref(0)
   const currentPage = ref(1)
   const perPage = ref(20)
+  const searchResults = ref([])
+  const detailsMap = ref({})
 
   const loading = ref(false)
   const error = ref(null)
@@ -20,6 +21,7 @@ export const useMediaStore = defineStore('media', () => {
       await JellyfinService.authenticate(username, password)
       views.value = await JellyfinService.getViews()
       items.value = []
+      searchResults.value = []
     } catch (e) {
       error.value = 'Ошибка при входе или получении плейлистов'
       console.error(e)
@@ -35,7 +37,6 @@ export const useMediaStore = defineStore('media', () => {
   }
 
   async function loadFolderItems(folderId) {
-    // legacy method, keep if still used elsewhere
     loading.value = true
     error.value = null
     try {
@@ -75,18 +76,58 @@ export const useMediaStore = defineStore('media', () => {
     }
   }
 
+  async function search(term) {
+    loading.value = true
+    error.value = null
+    try {
+      const result = await JellyfinService.searchItems(term)
+      searchResults.value = result
+    } catch (e) {
+      error.value = 'Ошибка при поиске'
+      console.error(e)
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function fetchItemDetails(itemId) {
+    if (detailsMap.value[itemId]) {
+      return detailsMap.value[itemId]
+    }
+
+    loading.value = true
+    error.value = null
+    try {
+      const itemDetails = await JellyfinService.getItemById(itemId)
+      detailsMap.value[itemId] = itemDetails
+      return itemDetails
+    } catch (e) {
+      error.value = 'Ошибка при получении деталей элемента'
+      console.error(e)
+      throw e
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     views,
     items,
     totalItems,
     currentPage,
     perPage,
+    searchResults,
     loading,
     error,
     login,
     selectView,
     loadFolderItems,
     loadFolderItemsPaged,
+    search,
+    fetchItemDetails,
+    async updateUserData(itemId, data) {
+      return await JellyfinService.updateUserData(itemId, data)
+    },
     getImageUrl: JellyfinService.getImageUrl,
     getStreamUrl: JellyfinService.getStreamUrl,
   }

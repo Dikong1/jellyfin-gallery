@@ -1,23 +1,37 @@
 const routes = [
   {
+    path: '/auth',
+    component: () => import('layouts/AuthLayout.vue'),
+    meta: { public: true },
+    children: [
+      {
+        path: '',
+        name: 'AuthPage',
+        component: () => import('pages/AuthPage.vue'),
+      },
+    ],
+  },
+  {
     path: '/',
-    component: () => import('layouts/MainLayout.vue'), // MainLayout will contain QLayout
+    component: () => import('layouts/MainLayout.vue'),
+    meta: { requiresAuth: true },
     children: [
       {
         path: '',
         redirect: '/auth',
       },
       {
-        path: 'auth',
-        component: () => import('pages/AuthPage.vue'),
-      },
-      {
         path: 'gallery',
-        component: () => import('pages/MediaGallery.vue'),
+        component: () => import('src/pages/MediaGallery.vue'),
       },
       {
         path: 'view/:id',
         component: () => import('pages/MediaItems.vue'),
+      },
+      {
+        path: '/watch/:id',
+        name: 'WatchVideo',
+        component: () => import('pages/WatchVideoPage.vue'),
       },
     ],
   },

@@ -1,50 +1,42 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
-      <q-toolbar class="bg-primary text-white">
-        <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          @click="leftDrawerOpen = !leftDrawerOpen"
-          v-if="showDrawer"
-        />
-        <q-avatar square class="q-ml-sm">
-          <q-icon name="photo_album" />
-        </q-avatar>
-        <q-toolbar-title>Jellyfin Gallery</q-toolbar-title>
+  <q-layout view="hHh lpR fFf">
+    <!-- Top Header -->
+    <q-header reveal class="bg-primary text-white">
+      <q-toolbar class="q-px-md q-pt-sm">
+        <q-btn flat round dense icon="menu" @click="leftDrawerOpen = !leftDrawerOpen" />
+
+        <q-toolbar-title class="text-weight-bold"> Jellyfin Gallery </q-toolbar-title>
+
         <q-space />
+
+        <q-btn dense round flat icon="search" @click="toSearch" />
+
         <q-toggle
           v-model="$q.dark.isActive"
           checked-icon="dark_mode"
           unchecked-icon="light_mode"
-          class="q-ml-md"
+          class="q-mr-md"
           size="sm"
           :label="$q.dark.isActive ? 'Dark' : 'Light'"
-          dense
         />
-        <q-btn v-if="showDrawer" flat icon="logout" @click="logout" />
+
+        <q-btn dense round flat icon="logout" @click="logout" />
       </q-toolbar>
     </q-header>
 
-    <q-drawer
-      v-if="showDrawer"
-      v-model="leftDrawerOpen"
-      show-if-above
-      bordered
-      :class="$q.dark.isActive ? 'bg-grey-9 text-white' : 'bg-white text-black'"
-    >
-      <q-list>
-        <q-item-label header>Navigation</q-item-label>
-        <q-item to="/gallery" exact clickable v-ripple>
+    <!-- Sidebar Drawer -->
+    <q-drawer v-model="leftDrawerOpen" ovevrlay behavior="mobile" class="bg-secondary text-white">
+      <q-list padding class="text-white">
+        <q-item-label header class="text-grey-4">Navigation</q-item-label>
+
+        <q-item clickable v-ripple to="/gallery" exact>
           <q-item-section avatar>
-            <q-icon name="photo_library" />
+            <q-icon name="home" />
           </q-item-section>
-          <q-item-section>Галерея</q-item-section>
+          <q-item-section>Home</q-item-section>
         </q-item>
 
-        <q-item-label header>Views</q-item-label>
+        <q-item-label header class="text-grey-4">Views</q-item-label>
         <q-item
           v-for="view in media.views.Items"
           :key="view.Id"
@@ -60,35 +52,48 @@
       </q-list>
     </q-drawer>
 
+    <!-- Page Content -->
     <q-page-container>
-      <transition name="fade" mode="out-in">
-        <router-view />
-      </transition>
+      <router-view v-slot="{ Component }">
+        <transition name="fade" mode="out-in">
+          <component :is="Component" :search="search" />
+        </transition>
+      </router-view>
     </q-page-container>
   </q-layout>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { useMediaStore } from 'src/stores/useMediaStore'
-import { getAuth, clearAuth } from 'src/utils/auth'
+import { ref, onMounted, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useQuasar } from 'quasar'
+import { getAuth, clearAuth } from 'src/utils/auth'
+import { useMediaStore } from 'src/stores/useMediaStore'
 
 const $q = useQuasar()
-const leftDrawerOpen = ref(false)
-const media = useMediaStore()
 const router = useRouter()
 const route = useRoute()
+const media = useMediaStore()
 
-const showDrawer = computed(() => route.path !== '/auth')
+const leftDrawerOpen = ref(false)
+const search = ref('')
+const isAuthPage = ref(route.path === '/auth')
+
+watch(
+  () => route.path,
+  (val) => {
+    isAuthPage.value = val === '/auth'
+  },
+)
 
 onMounted(async () => {
-  const saved = localStorage.getItem('dark')
-  $q.dark.set(saved !== 'false')
+  const dark = localStorage.getItem('dark')
+  if (dark === null || dark === 'true') $q.dark.set(true)
 
   const auth = getAuth()
-  if (!auth && route.path !== '/auth') return router.push('/auth')
+  if (!auth && route.path !== '/auth') {
+    return router.push('/auth')
+  }
 
   try {
     if (auth) await media.login(auth.username, auth.password)
@@ -105,6 +110,10 @@ watch(
   },
 )
 
+function toSearch() {
+  router.push('/search')
+}
+
 function logout() {
   clearAuth()
   router.push('/auth')
@@ -114,7 +123,7 @@ function logout() {
 <style scoped>
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.3s ease;
+  transition: opacity 0.25s ease;
 }
 .fade-enter-from,
 .fade-leave-to {
