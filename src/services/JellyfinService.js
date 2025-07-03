@@ -21,7 +21,7 @@ export const JellyfinService = {
 
   async getViews() {
     const r = await api.get(`/Users/${userId}/Views`)
-    return r.data // contains .Items[]
+    return r.data
   },
 
   async getItemsByParent(parentId, types = 'Video,Audio') {
@@ -62,13 +62,18 @@ export const JellyfinService = {
   getImageUrl(item) {
     const tag = item.ImageTags?.Primary || item.ImageTags?.Backdrop?.[0]
     const type = item.ImageTags?.Primary ? 'Primary' : 'Backdrop'
-    if (!tag) return 'https://via.placeholder.com/500x281?text=No+Image'
+    if (!tag) return 'src/assets/no-image.png'
 
     return `${host}/Items/${item.Id}/Images/${type}?tag=${tag}&quality=90&X-MediaBrowser-Token=${token}`
   },
 
   getStreamUrl(itemId) {
     return `${host}/Videos/${itemId}/stream?static=true&X-MediaBrowser-Token=${token}`
+  },
+
+  getDocumentUrl(itemId) {
+    // Uses the token to build a download link for PDF.js or iframe
+    return `${host}/Items/${itemId}/Download?api_key=${token}`
   },
 
   async searchItems(term, limit = 100) {
@@ -91,8 +96,8 @@ export const JellyfinService = {
     const r = await api.get(`/Users/${userId}/Items/${itemId}`)
     return r.data
   },
+
   async updateUserData(itemId, data) {
-    // userId and token are already set after authentication
     const r = await api.post(`/UserItems/${itemId}/UserData`, {
       ...data,
       ItemId: itemId,

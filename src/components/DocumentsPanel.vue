@@ -11,7 +11,7 @@
       ]"
     />
 
-    <!-- Infinite Scroll Media Items -->
+    <!-- Infinite Scroll Documents -->
     <q-infinite-scroll @load="loadMore" :offset="100" :disable="noMoreItems">
       <!-- Grid View -->
       <div v-if="layout === 'grid'" class="row q-col-gutter-md">
@@ -20,20 +20,14 @@
             class="hover-scale row no-wrap q-ma-xs"
             style="height: 150px"
             clickable
-            @click="$router.push(`/watch/${it.Id}`)"
+            @click="$router.push(`/document/${it.Id}`)"
           >
-            <!-- Left image -->
-            <q-img
-              :src="media.getImageUrl(it)"
-              :ratio="16 / 9"
-              style="width: 40%; min-width: 120px; object-fit: cover"
-              class="q-ma-sm rounded-borders"
-            />
+            <!-- Document cover -->
+            <q-icon name="picture_as_pdf" color="red" size="80px" class="q-ma-sm" />
 
-            <!-- Right text content -->
+            <!-- Metadata -->
             <q-card-section
               class="column justify-between q-pa-sm"
-              horizontal
               style="width: 60%; overflow: hidden"
             >
               <div class="text-subtitle2 ellipsis">{{ it.Name }}</div>
@@ -52,10 +46,8 @@
               </div>
 
               <div v-if="details[it.Id]?.DateCreated" class="text-caption text-grey-6 q-mt-xs">
-                <span>👁 {{ details[it.Id].UserData.PlayCount }}</span>
-                <span v-if="details[it.Id]?.DateCreated" class="q-ml-sm">
-                  📅 {{ formatDate(details[it.Id].DateCreated) }}
-                </span>
+                <span>👁 {{ details[it.Id]?.UserData?.PlayCount || 0 }}</span>
+                <span class="q-ml-sm"> 📅 {{ formatDate(details[it.Id].DateCreated) }} </span>
               </div>
             </q-card-section>
           </q-card>
@@ -71,23 +63,18 @@
             clickable
             class="q-mb-md q-pa-md"
             style="min-height: 140px; border-radius: 12px; transition: box-shadow 0.2s"
-            @click="$router.push(`/watch/${it.Id}`)"
+            @click="$router.push(`/document/${it.Id}`)"
           >
             <q-item-section avatar top>
-              <q-img
-                :src="media.getImageUrl(it)"
-                style="width: 180px; height: 100px; object-fit: cover; border-radius: 8px"
-              />
+              <q-icon name="picture_as_pdf" color="red" size="80px" class="q-mx-auto" />
             </q-item-section>
             <q-item-section>
               <q-item-label class="text-h6 q-mb-xs">{{ it.Name }}</q-item-label>
               <q-item-label caption v-if="details[it.Id]?.Overview" class="text-body2 q-mb-xs">
-                {{ details[it.Id].Overview }} || 'Без описания'
+                {{ details[it.Id].Overview }}
               </q-item-label>
               <div class="text-caption q-mt-xs">
-                <span v-if="details[it.Id]?.UserData.PlayCount"
-                  >👁 {{ details[it.Id].UserData.PlayCount }}</span
-                >
+                <span>👁 {{ details[it.Id]?.UserData?.PlayCount || 0 }}</span>
                 <span v-if="details[it.Id]?.DateCreated" class="q-ml-sm">
                   📅 {{ formatDate(details[it.Id].DateCreated) }}
                 </span>
@@ -169,32 +156,6 @@ const formatDate = (date) => format(new Date(date), 'yyyy-MM-dd')
 </script>
 
 <style scoped>
-.fullscreen-video-wrapper {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: black;
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.fullscreen-video {
-  max-width: 100%;
-  max-height: 100%;
-  outline: none;
-}
-
-.close-button {
-  position: fixed;
-  top: 16px;
-  right: 16px;
-  z-index: 10000;
-}
-
 .hover-scale:hover {
   transform: scale(1.02);
   transition: transform 0.2s;

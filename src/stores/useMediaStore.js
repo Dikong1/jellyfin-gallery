@@ -3,8 +3,8 @@ import { ref } from 'vue'
 import { JellyfinService } from 'src/services/JellyfinService'
 
 export const useMediaStore = defineStore('media', () => {
-  const views = ref([]) // library views
-  const items = ref([]) // media items in current page
+  const views = ref([])
+  const items = ref([])
   const totalItems = ref(0)
   const currentPage = ref(1)
   const perPage = ref(20)
@@ -23,7 +23,7 @@ export const useMediaStore = defineStore('media', () => {
       items.value = []
       searchResults.value = []
     } catch (e) {
-      error.value = 'Ошибка при входе или получении плейлистов'
+      error.value = 'Ошибка при входе или получении библиотеки'
       console.error(e)
       throw e
     } finally {
@@ -45,7 +45,7 @@ export const useMediaStore = defineStore('media', () => {
       totalItems.value = result.length
       return result
     } catch (e) {
-      error.value = 'Ошибка при загрузке медиа из папки'
+      error.value = 'Ошибка при загрузке медиа'
       console.error(e)
       return []
     } finally {
@@ -68,7 +68,7 @@ export const useMediaStore = defineStore('media', () => {
       currentPage.value = page
       return result
     } catch (e) {
-      error.value = 'Ошибка при загрузке данных с пагинацией'
+      error.value = 'Ошибка при загрузке с пагинацией'
       console.error(e)
       return { Items: [], TotalRecordCount: 0 }
     } finally {
@@ -94,7 +94,6 @@ export const useMediaStore = defineStore('media', () => {
     if (detailsMap.value[itemId]) {
       return detailsMap.value[itemId]
     }
-
     loading.value = true
     error.value = null
     try {
@@ -102,7 +101,7 @@ export const useMediaStore = defineStore('media', () => {
       detailsMap.value[itemId] = itemDetails
       return itemDetails
     } catch (e) {
-      error.value = 'Ошибка при получении деталей элемента'
+      error.value = 'Ошибка при получении деталей'
       console.error(e)
       throw e
     } finally {
@@ -130,5 +129,6 @@ export const useMediaStore = defineStore('media', () => {
     },
     getImageUrl: JellyfinService.getImageUrl,
     getStreamUrl: JellyfinService.getStreamUrl,
+    getDocumentUrl: JellyfinService.getDocumentUrl,
   }
 })

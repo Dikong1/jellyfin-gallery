@@ -1,6 +1,14 @@
 <template>
   <q-page class="q-pa-md row q-gutter-md">
     <div class="col-12 col-md-8">
+      <q-btn
+        flat
+        round
+        icon="arrow_back"
+        @click="$router.go(-1)"
+        class="q-mb-md"
+        :class="$q.dark.isActive ? 'text-white' : 'text-black'"
+      />
       <q-card flat bordered>
         <q-card-section>
           <video

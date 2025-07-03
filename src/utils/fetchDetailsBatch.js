@@ -1,6 +1,6 @@
 import { JellyfinService } from 'src/services/JellyfinService'
 
-export async function fetchDetailsBatch(items, batchSize = 5, delayMs = 300) {
+export async function fetchDetailsBatch(items, batchSize = 5, delayMs = 350) {
   const detailsMap = {}
 
   for (let i = 0; i < items.length; i += batchSize) {

@@ -1,6 +1,6 @@
 services:
   app:
-    image: jellyfin-gallery:1.0.0
+    image: jellyfin-gallery:2.0.0
     container_name: frontend
 
     command: ['quasar', 'dev']

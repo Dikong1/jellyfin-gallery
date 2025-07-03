@@ -1,6 +1,5 @@
 <template>
   <q-layout view="hHh lpR fFf">
-    <!-- Top Header -->
     <q-header reveal class="bg-primary text-white">
       <q-toolbar class="q-px-md q-pt-sm">
         <q-btn flat round dense icon="menu" @click="leftDrawerOpen = !leftDrawerOpen" />
@@ -24,7 +23,6 @@
       </q-toolbar>
     </q-header>
 
-    <!-- Sidebar Drawer -->
     <q-drawer v-model="leftDrawerOpen" ovevrlay behavior="mobile" class="bg-secondary text-white">
       <q-list padding class="text-white">
         <q-item-label header class="text-grey-4">Navigation</q-item-label>
@@ -34,20 +32,6 @@
             <q-icon name="home" />
           </q-item-section>
           <q-item-section>Home</q-item-section>
-        </q-item>
-
-        <q-item-label header class="text-grey-4">Views</q-item-label>
-        <q-item
-          v-for="view in media.views.Items"
-          :key="view.Id"
-          clickable
-          v-ripple
-          :to="`/view/${view.Id}`"
-        >
-          <q-item-section avatar>
-            <q-icon name="folder" />
-          </q-item-section>
-          <q-item-section>{{ view.Name }}</q-item-section>
         </q-item>
       </q-list>
     </q-drawer>

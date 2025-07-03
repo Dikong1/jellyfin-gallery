@@ -33,6 +33,11 @@ const routes = [
         name: 'WatchVideo',
         component: () => import('pages/WatchVideoPage.vue'),
       },
+      {
+        path: '/document/:id',
+        name: 'DocumentViewer',
+        component: () => import('pages/DocumentViewerPage.vue'),
+      },
     ],
   },
 
