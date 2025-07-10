@@ -1,5 +1,5 @@
 <template>
-  <q-page class="q-pa-md">
+  <q-page class="q-px-sm q-pt-none">
     <div class="row items-center q-mb-lg justify-between">
       <div class="col-auto">
         <q-btn
@@ -24,26 +24,30 @@
       <q-spinner size="50px" color="primary" />
     </div>
 
-    <div class="pdf-frame">
+    <!-- <div class="pdf-frame">
       <div ref="pdfContainer" class="pdf-container"></div>
-    </div>
+    </div> -->
+    <PDFViewer :source="url" :controls="controls" class="pdf-viewer" @download="handleDownload" />
   </q-page>
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useMediaStore } from 'src/stores/useMediaStore'
 import { format } from 'date-fns'
-import * as pdfjsLib from 'pdfjs-dist'
+// import * as pdfjsLib from 'pdfjs-dist'
+import PDFViewer from 'pdf-viewer-vue'
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs'
+// pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs'
 
 const route = useRoute()
 const media = useMediaStore()
 const loading = ref(true)
 const docDetails = ref(null)
-const pdfContainer = ref(null)
+// const pdfContainer = ref(null)
+const url = ref('<PDF_URL>')
+const controls = ref(['zoom', 'catalog', 'switchPage'])
 
 const formatDate = (date) => format(new Date(date), 'yyyy-MM-dd')
 
@@ -53,32 +57,37 @@ onMounted(async () => {
     docDetails.value = await media.fetchItemDetails(id)
 
     const downloadUrl = media.getDocumentUrl(id)
+    console.log('Download URL:', downloadUrl)
 
-    await nextTick()
+    // ----------------
+    url.value = downloadUrl
+    // -----------------
 
-    if (!pdfContainer.value) {
-      console.error('PDF container is still null!')
-      return
-    }
+    // await nextTick()
 
-    pdfContainer.value.innerHTML = ''
+    // if (!pdfContainer.value) {
+    //   console.error('PDF container is still null!')
+    //   return
+    // }
 
-    const loadingTask = pdfjsLib.getDocument(downloadUrl)
-    const pdf = await loadingTask.promise
+    // pdfContainer.value.innerHTML = ''
 
-    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-      const page = await pdf.getPage(pageNum)
-      const viewport = page.getViewport({ scale: 1.5 })
+    // const loadingTask = pdfjsLib.getDocument(downloadUrl)
+    // const pdf = await loadingTask.promise
 
-      const canvas = document.createElement('canvas')
-      const context = canvas.getContext('2d')
-      canvas.width = viewport.width
-      canvas.height = viewport.height
+    // for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+    //   const page = await pdf.getPage(pageNum)
+    //   const viewport = page.getViewport({ scale: 1.5 })
 
-      await page.render({ canvasContext: context, viewport }).promise
+    //   const canvas = document.createElement('canvas')
+    //   const context = canvas.getContext('2d')
+    //   canvas.width = viewport.width
+    //   canvas.height = viewport.height
 
-      pdfContainer.value.appendChild(canvas)
-    }
+    //   await page.render({ canvasContext: context, viewport }).promise
+
+    //   pdfContainer.value.appendChild(canvas)
+    // }
   } catch (e) {
     console.error('Error loading PDF:', e)
   } finally {
@@ -110,5 +119,12 @@ canvas {
   border: 1px solid #ccc;
   border-radius: 4px;
   max-width: 100%;
+}
+
+.pdf-viewer {
+  width: 100%;
+  max-width: 70vw;
+  height: 90vh;
+  justify-self: center;
 }
 </style>

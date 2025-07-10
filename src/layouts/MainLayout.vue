@@ -23,9 +23,16 @@
       </q-toolbar>
     </q-header>
 
-    <q-drawer v-model="leftDrawerOpen" ovevrlay behavior="mobile" class="bg-secondary text-white">
-      <q-list padding class="text-white">
-        <q-item-label header class="text-grey-4">Navigation</q-item-label>
+    <q-drawer
+      v-model="leftDrawerOpen"
+      ovevrlay
+      behavior="mobile"
+      :class="$q.dark.isActive ? 'bg-secondary text-white' : 'bg-white text-black'"
+    >
+      <q-list padding :class="$q.dark.isActive ? 'text-white' : 'text-black'">
+        <q-item-label header :class="$q.dark.isActive ? 'text-grey-4' : 'bg-white text-black'"
+          >Navigation</q-item-label
+        >
 
         <q-item clickable v-ripple to="/gallery" exact>
           <q-item-section avatar>
