@@ -88,7 +88,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useMediaStore } from 'src/stores/useMediaStore'
 import { format } from 'date-fns'
 import { fetchDetailsBatch } from 'src/utils/fetchDetailsBatch'
@@ -106,6 +106,10 @@ const noMoreItems = ref(false)
 const isFetchingMore = ref(false)
 
 const filteredItems = computed(() => allItems.value)
+
+onMounted(() => {
+  console.log('Mounted DocumentPanel with folderId:', props.folderId)
+})
 
 watch(
   () => props.folderId,

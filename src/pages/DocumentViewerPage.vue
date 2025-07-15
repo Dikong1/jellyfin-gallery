@@ -24,10 +24,13 @@
       <q-spinner size="50px" color="primary" />
     </div>
 
-    <!-- <div class="pdf-frame">
-      <div ref="pdfContainer" class="pdf-container"></div>
-    </div> -->
-    <PDFViewer :source="url" :controls="controls" class="pdf-viewer" @download="handleDownload" />
+    <PDFViewer
+      :source="url"
+      :controls="controls"
+      class="pdf-viewer"
+      :filename="filename"
+      zoom="175"
+    />
   </q-page>
 </template>
 
@@ -36,18 +39,15 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useMediaStore } from 'src/stores/useMediaStore'
 import { format } from 'date-fns'
-// import * as pdfjsLib from 'pdfjs-dist'
 import PDFViewer from 'pdf-viewer-vue'
-
-// pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs'
 
 const route = useRoute()
 const media = useMediaStore()
 const loading = ref(true)
 const docDetails = ref(null)
-// const pdfContainer = ref(null)
-const url = ref('<PDF_URL>')
+const url = ref('')
 const controls = ref(['zoom', 'catalog', 'switchPage'])
+const filename = ref('Документ')
 
 const formatDate = (date) => format(new Date(date), 'yyyy-MM-dd')
 
@@ -57,37 +57,9 @@ onMounted(async () => {
     docDetails.value = await media.fetchItemDetails(id)
 
     const downloadUrl = media.getDocumentUrl(id)
-    console.log('Download URL:', downloadUrl)
 
-    // ----------------
     url.value = downloadUrl
-    // -----------------
-
-    // await nextTick()
-
-    // if (!pdfContainer.value) {
-    //   console.error('PDF container is still null!')
-    //   return
-    // }
-
-    // pdfContainer.value.innerHTML = ''
-
-    // const loadingTask = pdfjsLib.getDocument(downloadUrl)
-    // const pdf = await loadingTask.promise
-
-    // for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-    //   const page = await pdf.getPage(pageNum)
-    //   const viewport = page.getViewport({ scale: 1.5 })
-
-    //   const canvas = document.createElement('canvas')
-    //   const context = canvas.getContext('2d')
-    //   canvas.width = viewport.width
-    //   canvas.height = viewport.height
-
-    //   await page.render({ canvasContext: context, viewport }).promise
-
-    //   pdfContainer.value.appendChild(canvas)
-    // }
+    filename.value = docDetails.value.Name || 'Документ'
   } catch (e) {
     console.error('Error loading PDF:', e)
   } finally {

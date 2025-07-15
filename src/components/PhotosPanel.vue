@@ -84,7 +84,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useMediaStore } from 'src/stores/useMediaStore'
 import { format } from 'date-fns'
 import { fetchDetailsBatch } from 'src/utils/fetchDetailsBatch'
@@ -101,6 +101,10 @@ const loadedPages = ref(0)
 const noMoreItems = ref(false)
 const showDialog = ref(false)
 const selectedPhotoUrl = ref(null)
+
+onMounted(() => {
+  console.log('Mounted PhotosPanel with folderId:', props.folderId)
+})
 
 watch(
   () => props.folderId,
