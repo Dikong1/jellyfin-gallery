@@ -47,7 +47,7 @@ const loading = ref(true)
 const docDetails = ref(null)
 const url = ref('')
 const controls = ref(['zoom', 'catalog', 'switchPage'])
-const filename = ref('Документ')
+const filename = ref('pdffiel')
 
 const formatDate = (date) => format(new Date(date), 'yyyy-MM-dd')
 
@@ -59,7 +59,6 @@ onMounted(async () => {
     const downloadUrl = media.getDocumentUrl(id)
 
     url.value = downloadUrl
-    filename.value = docDetails.value.Name || 'Документ'
   } catch (e) {
     console.error('Error loading PDF:', e)
   } finally {
@@ -94,9 +93,14 @@ canvas {
 }
 
 .pdf-viewer {
-  width: 100%;
-  max-width: 70vw;
-  height: 90vh;
-  justify-self: center;
+  width: 100vw;
+  max-width: 100vw;
+  height: 92vh;
+  min-height: 600px;
+  margin: 0 auto;
+  display: block;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.03);
 }
 </style>
