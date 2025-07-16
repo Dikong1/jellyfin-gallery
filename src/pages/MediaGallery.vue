@@ -21,7 +21,7 @@
         <VideoPanel :folder-id="homeVideosId" />
       </q-tab-panel>
       <q-tab-panel name="photos">
-        <PhotosPanel :folder-id="photosId" />
+        <AlbumPanel />
       </q-tab-panel>
       <q-tab-panel name="books">
         <DocumentsPanel :folder-id="booksId" />
@@ -37,7 +37,8 @@ import { useMediaStore } from 'src/stores/useMediaStore'
 import { getAuth, clearAuth } from 'src/utils/auth'
 import VideoPanel from '../components/VideoPanel.vue'
 import DocumentsPanel from '../components/DocumentsPanel.vue'
-import PhotosPanel from '../components/PhotosPanel.vue'
+import AlbumPanel from '../components/AlbumPanel.vue'
+
 const router = useRouter()
 const media = useMediaStore()
 const activeTab = ref('homevideos')
@@ -46,10 +47,10 @@ const homeVideosId = computed(
   () => media.views.Items?.find((v) => v.CollectionType === 'movies')?.Id || null,
   console.log('Home videos ID:', media.views.Items),
 )
-const photosId = computed(() => {
-  const items = media.views.Items?.filter((v) => v.CollectionType === 'homevideos') || []
-  return items[2]?.Id || null
-})
+// const photosId = computed(() => {
+//   const items = media.views.Items?.filter((v) => v.CollectionType === 'homevideos') || []
+//   return items[2]?.Id || null
+// })
 const booksId = computed(
   () => media.views.Items?.find((v) => v.CollectionType === 'books')?.Id || null,
 )

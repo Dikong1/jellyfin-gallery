@@ -20,7 +20,7 @@ export const JellyfinService = {
   },
 
   async getViews() {
-    const r = await api.get(`/Users/${userId}/Views`)
+    const r = await api.get(`/UserViews?userid=${userId}`)
     return r.data
   },
 
