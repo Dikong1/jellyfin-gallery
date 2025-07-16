@@ -11,9 +11,9 @@
       indicator-color="transparent"
       align="center"
     >
-      <q-tab class="tab" name="homevideos" icon="movie" label="Видео" />
-      <q-tab class="tab" name="photos" icon="image" label="Фото"></q-tab>
-      <q-tab class="tab" name="books" icon="picture_as_pdf" label="Документы" />
+      <q-tab class="tab" name="homevideos" icon="movie">{{  $t('video')  }} </q-tab>
+      <q-tab class="tab" name="photos" icon="image">{{  $t('photos')  }}</q-tab>
+      <q-tab class="tab" name="books" icon="picture_as_pdf">{{  $t('books')  }}</q-tab>
     </q-tabs>
 
     <q-tab-panels v-model="activeTab" animated class="q-px-md">

@@ -9,22 +9,22 @@
         <q-avatar size="56px" class="q-mb-sm">
           <q-icon name="photo_album" />
         </q-avatar>
-        <div class="text-h6">Welcome to Jellyfin</div>
-        <div class="text-caption text-grey-7">Sign in to continue</div>
+        <div class="text-h6">{{ $t('welcome') }}</div>
+        <div class="text-caption text-grey-7">{{ $t('signIn') }}</div>
       </q-card-section>
 
       <q-card-section class="q-gutter-md q-pt-md">
-        <q-input v-model="username" label="Username" filled :dark="$q.dark.isActive" />
+        <q-input v-model="username" :label="$t('username')" filled :dark="$q.dark.isActive" />
         <q-input
           v-model="password"
           type="password"
-          label="Password"
+          :label="$t('password')"
           filled
           :dark="$q.dark.isActive"
         />
         <q-btn
           :loading="media.loading"
-          label="Login"
+          :label="$t('login')"
           color="primary"
           unelevated
           class="full-width"
@@ -53,7 +53,7 @@ async function login() {
     saveAuth(username.value, password.value)
     router.push('/gallery')
   } catch (err) {
-    media.error = 'Login failed: ' + (err.message ? `: ${err.message}` : '')
+    media.error.value = 'Login failed: ' + (err.message ? `: ${err.message}` : '')
     console.error('Login error: ', err)
   }
 }
