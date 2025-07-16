@@ -1,3 +1,5 @@
+import SearchPage from 'src/pages/SearchPage.vue';
+
 const routes = [
   {
     path: '/auth',
@@ -37,6 +39,12 @@ const routes = [
         path: '/document/:id',
         name: 'DocumentViewer',
         component: () => import('pages/DocumentViewerPage.vue'),
+      },
+      // Добавляем маршрут для поиска
+      {
+        path: '/search',
+        name: 'search',
+        component: SearchPage,
       },
     ],
   },

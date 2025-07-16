@@ -6,8 +6,8 @@
       toggle-color="primary"
       class="q-mb-md"
       :options="[
-        { label: 'Сетка', value: 'grid', icon: 'grid_view' },
-        { label: 'Список', value: 'list', icon: 'view_list' },
+        { label: $t('layout.grid'), value: 'grid', icon: 'grid_view' },
+        { label: $t('layout.list'), value: 'list', icon: 'view_list' },
       ]"
     />
 
