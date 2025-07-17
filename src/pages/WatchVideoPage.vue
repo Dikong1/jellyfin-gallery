@@ -1,15 +1,7 @@
 <template>
   <q-page class="q-pa-md row q-gutter-md">
-    <div class="col-12 col-md-8">
-      <q-btn
-        flat
-        round
-        icon="arrow_back"
-        @click="$router.go(-1)"
-        class="q-mb-md"
-        :class="$q.dark.isActive ? 'text-white' : 'text-black'"
-      />
-      <q-card flat bordered>
+    <div class="col-8">
+      <q-card flat>
         <q-card-section>
           <video
             ref="videoRef"
@@ -35,7 +27,7 @@
       </q-card>
     </div>
 
-    <div class="col-12 col-md-4">
+    <div class="col q-pt-md">
       <q-list>
         <q-item
           v-for="item in relatedItems"
@@ -49,7 +41,9 @@
           </q-item-section>
           <q-item-section>
             <q-item-label>{{ item.Name }}</q-item-label>
-            <q-item-label caption>{{ item.Overview?.slice(0, 80) }}...</q-item-label>
+            <q-item-label caption v-if="details[item.Id]?.DateCreated">
+              📅 {{ formatDate(details[item.Id].DateCreated) }}
+            </q-item-label>
           </q-item-section>
         </q-item>
       </q-list>
@@ -58,47 +52,66 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { useMediaStore } from 'src/stores/useMediaStore'
 import { format } from 'date-fns'
+import { fetchDetailsBatch } from 'src/utils/fetchDetailsBatch'
 
 const route = useRoute()
-const videoId = route.params.id
 const videoRef = ref(null)
 const media = useMediaStore()
 
+const videoId = ref(route.params.id)
 const videoData = ref(null)
 const relatedItems = ref([])
+const details = ref({})
 let playMarked = false
 
 const VOLUME_KEY = 'jellyfin-player-volume'
 const PROGRESS_KEY = (id) => `jellyfin-progress-${id}`
 
-onMounted(async () => {
-  const item = await media.fetchItemDetails(videoId)
+async function loadVideo(id) {
+  playMarked = false
+  const item = await media.fetchItemDetails(id)
   videoData.value = item
 
-  // Optionally fetch related videos from same folder
   if (item?.ParentId) {
     const result = await media.loadFolderItemsPaged(item.ParentId, 1, 20)
-    relatedItems.value = result.Items.filter((i) => i.Id !== videoId)
+    relatedItems.value = result.Items.filter((i) => i.Id !== id)
+    // Fetch details for related items
+    details.value = await fetchDetailsBatch(relatedItems.value)
+    console.log('Related items:', relatedItems.value)
+    console.log('Details map:', details.value)
   }
 
-  // Resume position
+  await nextTick()
   const video = videoRef.value
   if (video) {
-    const resume = Number(localStorage.getItem(PROGRESS_KEY(videoId))) || 0
+    const resume = Number(localStorage.getItem(PROGRESS_KEY(id))) || 0
     const storedVolume = +localStorage.getItem(VOLUME_KEY)
     if (!isNaN(storedVolume)) video.volume = storedVolume
     video.currentTime = resume
+    video.load()
   }
+}
+
+onMounted(() => {
+  loadVideo(videoId.value)
 })
+
+watch(
+  () => route.params.id,
+  (newId) => {
+    videoId.value = newId
+    loadVideo(newId)
+  },
+)
 
 async function markAsPlayed() {
   if (playMarked) return
   playMarked = true
-  await media.updateUserData(videoId, {
+  await media.updateUserData(videoId.value, {
     Played: true,
     PlayCount: (videoData.value?.UserData?.PlayCount || 0) + 1,
     LastPlayedDate: new Date().toISOString(),
@@ -114,7 +127,7 @@ async function markAsPlayed() {
 function saveProgress() {
   const video = videoRef.value
   if (video) {
-    localStorage.setItem(PROGRESS_KEY(videoId), Math.floor(video.currentTime))
+    localStorage.setItem(PROGRESS_KEY(videoId.value), Math.floor(video.currentTime))
   }
 }
 

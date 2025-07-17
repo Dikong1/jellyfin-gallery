@@ -1,25 +1,5 @@
 <template>
   <q-page class="q-px-sm q-pt-none">
-    <div class="row items-center q-mb-lg justify-between">
-      <div class="col-auto">
-        <q-btn
-          flat
-          round
-          icon="arrow_back"
-          class="back-btn"
-          @click="$router.go(-1)"
-          :class="$q.dark.isActive ? 'text-white' : 'text-black'"
-        />
-      </div>
-      <div class="col text-center">
-        <h4 class="q-mb-none">{{ docDetails?.Name || 'Документ' }}</h4>
-        <div class="text-grey-7">
-          <span v-if="docDetails?.DateCreated"> 📅 {{ formatDate(docDetails.DateCreated) }} </span>
-        </div>
-      </div>
-      <div class="col-auto"></div>
-    </div>
-
     <div v-if="loading" class="row items-center justify-center">
       <q-spinner size="50px" color="primary" />
     </div>
@@ -28,8 +8,8 @@
       :source="url"
       :controls="controls"
       class="pdf-viewer"
+      zoom="75"
       :filename="filename"
-      zoom="175"
     />
   </q-page>
 </template>
@@ -38,7 +18,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useMediaStore } from 'src/stores/useMediaStore'
-import { format } from 'date-fns'
+// import { format } from 'date-fns'
 import PDFViewer from 'pdf-viewer-vue'
 
 const route = useRoute()
@@ -47,9 +27,7 @@ const loading = ref(true)
 const docDetails = ref(null)
 const url = ref('')
 const controls = ref(['zoom', 'catalog', 'switchPage'])
-const filename = ref('pdffiel')
-
-const formatDate = (date) => format(new Date(date), 'yyyy-MM-dd')
+const filename = ref('document.pdf')
 
 onMounted(async () => {
   try {
@@ -58,7 +36,10 @@ onMounted(async () => {
 
     const downloadUrl = media.getDocumentUrl(id)
 
-    url.value = downloadUrl
+    url.value = downloadUrl + '&filename=' + encodeURIComponent(docDetails.value.Name) + '.pdf'
+    console.log('PDF URL:', url.value)
+
+    filename.value = docDetails.value.Name + '.pdf'
   } catch (e) {
     console.error('Error loading PDF:', e)
   } finally {
@@ -68,18 +49,6 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.pdf-frame {
-  width: 100%;
-  max-width: 1000px;
-  height: 1200px;
-  overflow-y: auto;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  padding: 1rem;
-  margin: 0 auto;
-  background: #fff;
-}
-
 .pdf-container {
   display: flex;
   flex-direction: column;
@@ -93,7 +62,7 @@ canvas {
 }
 
 .pdf-viewer {
-  width: 100vw;
+  width: 99vw;
   max-width: 100vw;
   height: 92vh;
   min-height: 600px;

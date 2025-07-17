@@ -22,4 +22,4 @@ export default {
   username: 'Имя пользователя',
   password: 'Пароль',
   login: 'Войти',
-};
+}

@@ -71,14 +71,12 @@
     </q-infinite-scroll>
 
     <!-- Lightbox or modal for photo preview -->
-    <q-dialog v-model="showDialog">
-      <q-card>
-        <img
-          :src="selectedPhotoUrl"
-          alt="Выбранное изображение"
-          style="max-width: 90vw; max-height: 90vh"
-        />
-      </q-card>
+    <q-dialog v-model="showDialog" backdrop-filter="blur(5px)">
+      <img
+        :src="selectedPhotoUrl"
+        alt="Выбранное изображение"
+        style="max-width: 90vw; max-height: 90vh"
+      />
     </q-dialog>
   </div>
 </template>

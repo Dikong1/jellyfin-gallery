@@ -6,14 +6,15 @@
     <q-tabs
       v-model="activeTab"
       dense
-      class="bg-primary text-grey q-mt-none q-mb-md"
+      inline-label
+      class="bg-primary text-grey q-mt-none q-mb-xs"
       active-color="white"
       indicator-color="transparent"
       align="center"
     >
-      <q-tab class="tab" name="homevideos" icon="movie">{{  $t('video')  }} </q-tab>
-      <q-tab class="tab" name="photos" icon="image">{{  $t('photos')  }}</q-tab>
-      <q-tab class="tab" name="books" icon="picture_as_pdf">{{  $t('books')  }}</q-tab>
+      <q-tab class="tab" name="homevideos" icon="movie" :label="$t('video')" />
+      <q-tab class="tab" name="photos" icon="image" :label="$t('photos')" />
+      <q-tab class="tab" name="books" icon="picture_as_pdf" :label="$t('books')" />
     </q-tabs>
 
     <q-tab-panels v-model="activeTab" animated class="q-px-md">

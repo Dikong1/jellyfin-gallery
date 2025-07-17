@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- Layout Toggle -->
     <q-btn-toggle
       v-model="layout"
       toggle-color="primary"
@@ -11,9 +10,7 @@
       ]"
     />
 
-    <!-- Infinite Scroll Documents -->
     <q-infinite-scroll @load="loadMore" :offset="100" :disable="noMoreItems">
-      <!-- Grid View -->
       <div v-if="layout === 'grid'" class="row q-col-gutter-md">
         <div v-for="it in filteredItems" :key="it.Id" class="col-12 col-sm-6 col-md-4 col-lg-3">
           <q-card
@@ -22,10 +19,8 @@
             clickable
             @click="$router.push(`/document/${it.Id}`)"
           >
-            <!-- Document cover -->
             <q-icon name="picture_as_pdf" color="red" size="80px" class="q-ma-sm" />
 
-            <!-- Metadata -->
             <q-card-section
               class="column justify-between q-pa-sm"
               style="width: 60%; overflow: hidden"
@@ -54,7 +49,6 @@
         </div>
       </div>
 
-      <!-- List View -->
       <div v-else>
         <q-list :dark="$q.dark.isActive" bordered>
           <q-item
