@@ -24,6 +24,10 @@ export const JellyfinService = {
     return r.data
   },
 
+  getUserId() {
+    return userId
+  },
+
   async getItemsByParent(parentId, types = 'Video,Audio') {
     const r = await api.get(`/Users/${userId}/Items`, {
       params: { ParentId: parentId, IncludeItemTypes: types, Recursive: true },
@@ -40,6 +44,9 @@ export const JellyfinService = {
     fields = ['PrimaryImageAspectRatio', 'SortName', 'Path', 'ChildCount', 'MediaSourceCount'],
     imageTypeLimit = 1,
   }) {
+    if (!userId) {
+      throw new Error('User ID is not set. Please authenticate first.')
+    }
     const r = await api.get(`/Users/${userId}/Items`, {
       params: {
         ParentId: parentId,
@@ -71,9 +78,8 @@ export const JellyfinService = {
     return `${host}/Videos/${itemId}/stream?static=true&X-MediaBrowser-Token=${token}`
   },
 
-  getDocumentUrl(itemId) {
-    // Uses the token to build a download link for PDF.js or iframe
-    return `${host}/Items/${itemId}/Download?api_key=${token}`
+  getDocumentUrl(itemId, filename = '') {
+    return `${host}/Items/${itemId}/Download/${filename}?api_key=${token}`
   },
 
   async searchItems(term, limit = 100) {
@@ -93,6 +99,9 @@ export const JellyfinService = {
   },
 
   async getItemById(itemId) {
+    if (!userId) {
+      throw new Error('User ID is not set. Please authenticate first.')
+    }
     const r = await api.get(`/Users/${userId}/Items/${itemId}`)
     return r.data
   },

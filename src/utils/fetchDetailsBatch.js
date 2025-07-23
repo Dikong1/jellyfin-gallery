@@ -3,6 +3,16 @@ import { JellyfinService } from 'src/services/JellyfinService'
 export async function fetchDetailsBatch(items, batchSize = 5, delayMs = 350) {
   const detailsMap = {}
 
+  if (
+    !JellyfinService.getUserId ||
+    typeof JellyfinService.getUserId !== 'function' ||
+    !JellyfinService.getUserId()
+  ) {
+    throw new Error(
+      'User ID is not set in JellyfinService. Please authenticate before calling fetchDetailsBatch.',
+    )
+  }
+
   for (let i = 0; i < items.length; i += batchSize) {
     const batch = items.slice(i, i + batchSize)
     const results = await Promise.allSettled(

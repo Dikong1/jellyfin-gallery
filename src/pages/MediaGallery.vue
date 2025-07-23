@@ -44,18 +44,6 @@ const router = useRouter()
 const media = useMediaStore()
 const activeTab = ref('homevideos')
 
-const homeVideosId = computed(
-  () => media.views.Items?.find((v) => v.CollectionType === 'movies')?.Id || null,
-  console.log('Home videos ID:', media.views.Items),
-)
-// const photosId = computed(() => {
-//   const items = media.views.Items?.filter((v) => v.CollectionType === 'homevideos') || []
-//   return items[2]?.Id || null
-// })
-const booksId = computed(
-  () => media.views.Items?.find((v) => v.CollectionType === 'books')?.Id || null,
-)
-
 onMounted(async () => {
   const creds = getAuth()
   if (!creds) return router.push('/auth')
@@ -68,6 +56,15 @@ onMounted(async () => {
     console.error('Login failed:', err)
   }
 })
+
+const homeVideosId = computed(
+  () => media.views.Items?.find((v) => v.CollectionType === 'movies')?.Id || null,
+  console.log('Home videos ID:', media.views.Items),
+)
+
+const booksId = computed(
+  () => media.views.Items?.find((v) => v.CollectionType === 'books')?.Id || null,
+)
 </script>
 
 <style scoped>

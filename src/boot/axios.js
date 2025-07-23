@@ -1,7 +1,7 @@
 import { defineBoot } from '#q-app/wrappers'
 import axios from 'axios'
 import { clearAuth } from 'src/utils/auth'
-import router from 'src/router'
+import router from 'src/router/index'
 
 const api = axios.create({
   baseURL: 'http://localhost:8096',

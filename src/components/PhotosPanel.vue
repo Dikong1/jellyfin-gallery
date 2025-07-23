@@ -99,6 +99,7 @@ const loadedPages = ref(0)
 const noMoreItems = ref(false)
 const showDialog = ref(false)
 const selectedPhotoUrl = ref(null)
+const isFetchingMore = ref(false)
 
 onMounted(() => {
   console.log('Mounted PhotosPanel with folderId:', props.folderId)
@@ -119,31 +120,40 @@ function formatDate(date) {
   return format(new Date(date), 'yyyy-MM-dd')
 }
 
-function loadMore(index, done) {
+async function loadMore(index, done) {
   if (media.loading || noMoreItems.value) {
     done()
     return
   }
 
+  isFetchingMore.value = true
+
   const nextPage = loadedPages.value + 1
-  media
-    .loadFolderItemsPaged(props.folderId, nextPage, media.perPage)
-    .then((result) => {
-      if (result.Items?.length) {
-        allPhotos.value.push(...result.Items)
-        loadedPages.value++
-        if (allPhotos.value.length >= result.TotalRecordCount) {
-          noMoreItems.value = true
-        }
-        return fetchDetailsBatch(result.Items).then((batch) => {
-          if (batch) Object.assign(details.value, batch)
-        })
-      } else {
+
+  try {
+    const result = await media.loadFolderItemsPaged(props.folderId, nextPage, media.perPage)
+
+    if (result.Items?.length) {
+      allPhotos.value.push(...result.Items)
+      loadedPages.value++
+
+      if (allPhotos.value.length >= result.TotalRecordCount) {
         noMoreItems.value = true
       }
-    })
-    .catch(console.error)
-    .finally(() => done())
+
+      const batch = await fetchDetailsBatch(result.Items)
+      if (batch) {
+        Object.assign(details.value, batch)
+      }
+    } else {
+      noMoreItems.value = true
+    }
+  } catch (error) {
+    console.error('Error loading folder items:', error)
+  } finally {
+    isFetchingMore.value = false
+    done()
+  }
 }
 
 function openPhoto(photo) {
@@ -171,7 +181,6 @@ function openPhoto(photo) {
   overflow: hidden;
 }
 
-/* Ensure all images in grid have the same size and aspect ratio */
 .photo-grid-img-wrapper {
   width: 100%;
   height: 180px;

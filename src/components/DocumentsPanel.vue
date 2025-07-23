@@ -116,7 +116,7 @@ watch(
   { immediate: true },
 )
 
-function loadMore(index, done) {
+async function loadMore(index, done) {
   if (media.loading || noMoreItems.value) {
     done()
     return
@@ -125,29 +125,33 @@ function loadMore(index, done) {
   isFetchingMore.value = true
 
   const nextPage = loadedPages.value + 1
-  media
-    .loadFolderItemsPaged(props.folderId, nextPage, media.perPage)
-    .then((result) => {
-      if (result.Items?.length) {
-        allItems.value.push(...result.Items)
-        loadedPages.value++
 
-        if (allItems.value.length >= result.TotalRecordCount) {
-          noMoreItems.value = true
-        }
+  try {
+    const result = await media.loadFolderItemsPaged(props.folderId, nextPage, media.perPage)
 
-        return fetchDetailsBatch(result.Items).then((batch) => {
-          if (batch) Object.assign(details.value, batch)
-        })
-      } else {
-        done()
+    if (result.Items?.length) {
+      allItems.value.push(...result.Items)
+      loadedPages.value++
+
+      if (allItems.value.length >= result.TotalRecordCount) {
+        noMoreItems.value = true
       }
-    })
-    .catch(console.error)
-    .finally(() => {
-      isFetchingMore.value = false
+
+      const batch = await fetchDetailsBatch(result.Items)
+      if (batch) {
+        Object.assign(details.value, batch)
+      }
+    } else {
+      noMoreItems.value = true
       done()
-    })
+    }
+  } catch (error) {
+    console.error('Error loading folder items:', error)
+    done()
+  } finally {
+    isFetchingMore.value = false
+    done()
+  }
 }
 
 const formatDate = (date) => format(new Date(date), 'yyyy-MM-dd')

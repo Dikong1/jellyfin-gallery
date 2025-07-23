@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- Layout Toggle -->
     <q-btn-toggle
       v-model="layout"
       toggle-color="primary"
@@ -11,9 +10,7 @@
       ]"
     />
 
-    <!-- Infinite Scroll Media Items -->
     <q-infinite-scroll @load="loadMore" :offset="100" :disable="noMoreItems">
-      <!-- Grid View -->
       <div v-if="layout === 'grid'" class="row q-col-gutter-md">
         <div v-for="it in filteredItems" :key="it.Id" class="col-12 col-sm-6 col-md-4 col-lg-3">
           <q-card
@@ -22,7 +19,6 @@
             clickable
             @click="$router.push(`/watch/${it.Id}`)"
           >
-            <!-- Left image -->
             <q-img
               :src="media.getImageUrl(it)"
               :ratio="16 / 9"
@@ -30,7 +26,6 @@
               class="q-ma-sm rounded-borders"
             />
 
-            <!-- Right text content -->
             <q-card-section
               class="column justify-between q-pa-sm"
               horizontal
@@ -62,7 +57,6 @@
         </div>
       </div>
 
-      <!-- List View -->
       <div v-else>
         <q-list :dark="$q.dark.isActive" bordered>
           <q-item
@@ -131,12 +125,13 @@ watch(
     details.value = {}
     loadedPages.value = 0
     noMoreItems.value = false
+    isFetchingMore.value = false
   },
   { immediate: true },
 )
 
-function loadMore(index, done) {
-  if (media.loading || noMoreItems.value) {
+async function loadMore(index, done) {
+  if (media.loading || noMoreItems.value || isFetchingMore.value) {
     done()
     return
   }
@@ -144,29 +139,31 @@ function loadMore(index, done) {
   isFetchingMore.value = true
 
   const nextPage = loadedPages.value + 1
-  media
-    .loadFolderItemsPaged(props.folderId, nextPage, media.perPage)
-    .then((result) => {
-      if (result.Items?.length) {
-        allItems.value.push(...result.Items)
-        loadedPages.value++
 
-        if (allItems.value.length >= result.TotalRecordCount) {
-          noMoreItems.value = true
-        }
+  try {
+    const result = await media.loadFolderItemsPaged(props.folderId, nextPage, media.perPage)
 
-        return fetchDetailsBatch(result.Items).then((batch) => {
-          if (batch) Object.assign(details.value, batch)
-        })
-      } else {
-        done()
+    if (result.Items?.length) {
+      allItems.value.push(...result.Items)
+      loadedPages.value++
+
+      if (allItems.value.length >= result.TotalRecordCount) {
+        noMoreItems.value = true
       }
-    })
-    .catch(console.error)
-    .finally(() => {
-      isFetchingMore.value = false
-      done()
-    })
+
+      const batch = await fetchDetailsBatch(result.Items)
+      if (batch) {
+        Object.assign(details.value, batch)
+      }
+    } else {
+      noMoreItems.value = true
+    }
+  } catch (error) {
+    console.error('Error loading folder items:', error)
+  } finally {
+    isFetchingMore.value = false
+    done()
+  }
 }
 
 const formatDate = (date) => format(new Date(date), 'yyyy-MM-dd')
