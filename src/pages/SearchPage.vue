@@ -4,7 +4,7 @@
     :class="$q.dark.isActive ? 'bg-grey-10 text-white' : 'bg-white text-dark'"
   >
     <q-separator spaced />
-    <div class="text-h5 text-weight-medium q-mb-md">Медиа в {{ viewName || 'Галерее' }}</div>
+    <div class="text-h5 text-weight-medium q-mb-md">Поиск по видео</div>
 
     <!-- Поле для поиска -->
     <q-input
@@ -32,7 +32,7 @@
         :key="item.Id"
         class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2"
       >
-        <q-card class="hover-scale shadow-2" clickable @click="openVideo(item.Id)">
+        <q-card class="hover-scale shadow-2" clickable @click="$router.push(`/watch/${it.Id}`)">
           <div style="position: relative">
             <img
               :src="media.getImageUrl(item)"
@@ -76,14 +76,10 @@ const searchQuery = ref('')
 
 const pageCount = computed(() => Math.ceil(filteredItems.value.length / perPage))
 
-
 const filteredItems = computed(() => {
   const query = searchQuery.value.toLowerCase()
-  return items.value.filter(item =>
-    item.Name.toLowerCase().includes(query)
-  )
+  return items.value.filter((item) => item.Name.toLowerCase().includes(query))
 })
-
 
 const pagedItems = computed(() => {
   const start = (page.value - 1) * perPage
@@ -98,11 +94,6 @@ onMounted(async () => {
 
   items.value = await media.loadFolderItems(viewId)
 })
-
-function openVideo(id) {
-  const url = media.getStreamUrl(id)
-  window.open(url, '_blank')
-}
 </script>
 
 <style scoped>
