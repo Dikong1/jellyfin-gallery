@@ -11,6 +11,8 @@ export const useMediaStore = defineStore('media', () => {
   const searchResults = ref([])
   const detailsMap = ref({})
 
+  const activeTab = ref('videos')
+
   const loading = ref(false)
   const error = ref(null)
 
@@ -109,6 +111,10 @@ export const useMediaStore = defineStore('media', () => {
     }
   }
 
+  function setActiveTab(tab) {
+    activeTab.value = tab
+  }
+
   return {
     views,
     items,
@@ -130,5 +136,7 @@ export const useMediaStore = defineStore('media', () => {
     getImageUrl: JellyfinService.getImageUrl,
     getStreamUrl: JellyfinService.getStreamUrl,
     getDocumentUrl: JellyfinService.getDocumentUrl,
+    getActiveTab: () => activeTab.value,
+    setActiveTab,
   }
 })

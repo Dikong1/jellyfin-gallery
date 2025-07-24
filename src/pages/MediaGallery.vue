@@ -11,14 +11,15 @@
       active-color="white"
       indicator-color="transparent"
       align="center"
+      @update:model-value="handleTab"
     >
-      <q-tab class="tab" name="homevideos" icon="movie" :label="$t('video')" />
+      <q-tab class="tab" name="videos" icon="movie" :label="$t('video')" />
       <q-tab class="tab" name="photos" icon="image" :label="$t('photos')" />
       <q-tab class="tab" name="books" icon="picture_as_pdf" :label="$t('books')" />
     </q-tabs>
 
-    <q-tab-panels v-model="activeTab" animated class="q-px-md">
-      <q-tab-panel name="homevideos">
+    <q-tab-panels v-model="activeTab" keep-alive swipeable animated class="q-px-md">
+      <q-tab-panel name="videos">
         <VideoPanel :folder-id="homeVideosId" />
       </q-tab-panel>
       <q-tab-panel name="photos">
@@ -42,7 +43,7 @@ import AlbumPanel from '../components/AlbumPanel.vue'
 
 const router = useRouter()
 const media = useMediaStore()
-const activeTab = ref('homevideos')
+const activeTab = ref('')
 
 onMounted(async () => {
   const creds = getAuth()
@@ -55,6 +56,8 @@ onMounted(async () => {
     router.push('/auth')
     console.error('Login failed:', err)
   }
+
+  activeTab.value = media.getActiveTab()
 })
 
 const homeVideosId = computed(
@@ -65,6 +68,11 @@ const homeVideosId = computed(
 const booksId = computed(
   () => media.views.Items?.find((v) => v.CollectionType === 'books')?.Id || null,
 )
+
+function handleTab(tab) {
+  media.setActiveTab(tab)
+  activeTab.value = tab
+}
 </script>
 
 <style scoped>
