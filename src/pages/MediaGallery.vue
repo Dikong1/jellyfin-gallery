@@ -36,7 +36,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useMediaStore } from 'src/stores/useMediaStore'
-import { getAuth, clearAuth } from 'src/utils/auth'
+import { getCredentials, clearCredentials } from 'src/utils/auth'
 import VideoPanel from '../components/VideoPanel.vue'
 import DocumentsPanel from '../components/DocumentsPanel.vue'
 import AlbumPanel from '../components/AlbumPanel.vue'
@@ -46,13 +46,13 @@ const media = useMediaStore()
 const activeTab = ref('')
 
 onMounted(async () => {
-  const creds = getAuth()
+  const creds = getCredentials()
   if (!creds) return router.push('/auth')
 
   try {
     await media.login(creds.username, creds.password)
   } catch (err) {
-    clearAuth()
+    clearCredentials()
     router.push('/auth')
     console.error('Login failed:', err)
   }

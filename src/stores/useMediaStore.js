@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { JellyfinService } from 'src/services/JellyfinService'
+import { clearCredentials, saveCredentials } from 'src/utils/auth' // Removed getCredentials as it's not used here
 
 export const useMediaStore = defineStore('media', () => {
   const views = ref([])
@@ -21,16 +22,39 @@ export const useMediaStore = defineStore('media', () => {
     error.value = null
     try {
       await JellyfinService.authenticate(username, password)
+      // Save the credentials if login was successful, for auto-login on refresh
+      saveCredentials(username, password)
+
+      // Now fetch views, etc., which will use the token set in JellyfinService
       views.value = await JellyfinService.getViews()
       items.value = []
       searchResults.value = []
     } catch (e) {
       error.value = 'Ошибка при входе или получении библиотеки'
       console.error(e)
+      // Clear any stored credentials or token if login failed
+      clearCredentials()
+      JellyfinService.clearAuthData()
       throw e
     } finally {
       loading.value = false
     }
+  }
+
+  // Add a logout action to the store
+  function logout() {
+    clearCredentials() // Clear saved username/password credentials
+    JellyfinService.clearAuthData() // Clear Jellyfin token and userId from service and localStorage
+    // Reset store state
+    views.value = []
+    items.value = []
+    totalItems.value = 0
+    currentPage.value = 1
+    searchResults.value = []
+    detailsMap.value = {}
+    activeTab.value = 'videos'
+    loading.value = false
+    error.value = null
   }
 
   async function selectView(viewId) {
@@ -125,6 +149,7 @@ export const useMediaStore = defineStore('media', () => {
     loading,
     error,
     login,
+    logout, // Make sure logout is returned
     selectView,
     loadFolderItems,
     loadFolderItemsPaged,

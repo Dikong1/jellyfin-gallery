@@ -39,7 +39,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useMediaStore } from 'src/stores/useMediaStore'
-import { saveAuth } from 'src/utils/auth'
+// Removed 'saveCredentials' import as it's now handled internally by useMediaStore().login
 
 const router = useRouter()
 const media = useMediaStore()
@@ -49,11 +49,14 @@ const password = ref('')
 
 async function login() {
   try {
+    // The media.login action will now handle calling JellyfinService.authenticate
+    // which in turn saves the Jellyfin API token to localStorage.
+    // It will also call saveCredentials internally if the login is successful.
     await media.login(username.value, password.value)
-    saveAuth(username.value, password.value)
     router.push('/gallery')
   } catch (err) {
-    media.error.value = 'Login failed: ' + (err.message ? `: ${err.message}` : '')
+    // Display a more user-friendly error message if login fails
+    media.error.value = 'Login failed. Please check your username and password.'
     console.error('Login error: ', err)
   }
 }
