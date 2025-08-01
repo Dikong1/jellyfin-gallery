@@ -22,7 +22,7 @@
           style="min-width: 70px"
         />
 
-        <q-btn dense round flat icon="search" @click="toSearch" />
+        <!-- <q-btn dense round flat icon="search" @click="toSearch" /> -->
 
         <q-toggle
           v-model="$q.dark.isActive"
@@ -33,8 +33,6 @@
           :label="$q.dark.isActive ? $t('darkMode.dark') : $t('darkMode.light')"
           style="min-width: 100px"
         />
-
-        <q-btn dense round flat icon="logout" @click="logout" />
       </q-toolbar>
     </q-header>
 
@@ -58,9 +56,11 @@
       </q-list>
     </q-drawer>
 
-    <!-- Page Content -->
     <q-page-container>
-      <router-view v-slot="{ Component }">
+      <div v-if="media.error" class="q-pa-md text-red text-center">
+        {{ media.error }}
+      </div>
+      <router-view v-else v-slot="{ Component }">
         <transition name="fade" mode="out-in">
           <component :is="Component" :search="search" />
         </transition>
@@ -71,79 +71,27 @@
 
 <script setup>
 import { ref, onMounted, watch } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+// import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
-import { getCredentials } from 'src/utils/auth' // Only need getCredentials here
 import { useMediaStore } from 'src/stores/useMediaStore'
 import { useI18n } from 'vue-i18n'
-import { JellyfinService } from 'src/services/JellyfinService' // Import JellyfinService to check token presence
 
 const $q = useQuasar()
-const router = useRouter()
-const route = useRoute()
+// const router = useRouter()
 const media = useMediaStore()
 
 const leftDrawerOpen = ref(false)
 const search = ref('')
-const isAuthPage = ref(route.path === '/auth')
 const { locale } = useI18n()
 
-watch(
-  () => route.path,
-  (val) => {
-    isAuthPage.value = val === '/auth'
-  },
-)
-
 onMounted(async () => {
-  // Set dark mode preference
   const dark = localStorage.getItem('dark')
   if (dark === null || dark === 'true') $q.dark.set(true)
 
-  // First, check if a Jellyfin API token is already present in JellyfinService (from localStorage)
-  // This indicates a previously authenticated session that might have been refreshed.
-  if (JellyfinService.getUserId() && JellyfinService.getToken()) {
-    // Assuming JellyfinService.getToken() is added
-    console.log('Jellyfin API token found in service. Attempting to validate...')
-    try {
-      // Make a lightweight API call to validate the existing token
-      await JellyfinService.getViews() // getViews is a good lightweight call
-      console.log('Existing Jellyfin API token is valid.')
-      // If the token is valid and we are on the auth page, redirect to gallery
-      if (route.path === '/auth') {
-        router.push('/gallery')
-      }
-      return // Exit onMounted as we are authenticated
-    } catch (e) {
-      console.error('Existing Jellyfin API token invalid or expired:', e)
-      // Token is bad, clear all authentication data and proceed to re-authenticate
-      media.logout() // This will clear credentials and token
-    }
-  }
-
-  // If no valid Jellyfin token was found (or it was invalid), try to log in with stored credentials
-  const credentials = getCredentials() // This gets the username/password from cookie
-  if (!credentials && route.path !== '/auth') {
-    console.log('No stored credentials found. Redirecting to authentication page.')
-    return router.push('/auth')
-  }
-
   try {
-    if (credentials) {
-      console.log('Attempting re-login with stored credentials...')
-      await media.login(credentials.username, credentials.password)
-      // If re-login is successful and we are on the auth page, redirect to gallery
-      if (route.path === '/auth') {
-        router.push('/gallery')
-      }
-    }
-  } catch (e) {
-    console.error('Auto-login with stored credentials failed:', e)
-    // If auto-login fails, ensure all auth data is cleared and redirect to login
-    media.logout() // This will clear credentials and token
-    if (route.path !== '/auth') {
-      router.push('/auth')
-    }
+    await media.initialize()
+  } catch (error) {
+    console.error('Failed to initialize application:', error)
   }
 })
 
@@ -154,14 +102,10 @@ watch(
   },
 )
 
-function toSearch() {
-  router.push({ name: 'search' })
-}
+// function toSearch() {
+//   router.push({ name: 'search' })
+// }
 
-function logout() {
-  media.logout() // Call the logout action from the store
-  router.push('/auth')
-}
 function switchLanguage(lang) {
   locale.value = lang
   localStorage.setItem('lang', lang)

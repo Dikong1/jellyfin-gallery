@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- Layout Toggle -->
     <q-btn-toggle
       v-model="layout"
       toggle-color="primary"
@@ -11,9 +10,7 @@
       ]"
     />
 
-    <!-- Infinite Scroll -->
     <q-infinite-scroll @load="loadMore" :offset="100" :disable="noMoreItems">
-      <!-- Grid View -->
       <div v-if="layout === 'grid'" class="row q-col-gutter-md">
         <div v-for="photo in allPhotos" :key="photo.Id" class="col-12 col-sm-6 col-md-4 col-lg-3">
           <q-card class="hover-scale" clickable @click="openPhoto(photo)">
@@ -42,7 +39,6 @@
         </div>
       </div>
 
-      <!-- List View -->
       <div v-else>
         <q-list :dark="$q.dark.isActive" bordered>
           <q-item v-for="photo in allPhotos" :key="photo.Id" clickable @click="openPhoto(photo)">
@@ -70,7 +66,6 @@
       </div>
     </q-infinite-scroll>
 
-    <!-- Lightbox or modal for photo preview -->
     <q-dialog v-model="showDialog" backdrop-filter="blur(5px)">
       <img
         :src="selectedPhotoUrl"

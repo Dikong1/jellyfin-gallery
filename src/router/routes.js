@@ -1,34 +1,17 @@
-import SearchPage from 'src/pages/SearchPage.vue';
+import SearchPage from 'src/pages/SearchPage.vue'
 
 const routes = [
   {
-    path: '/auth',
-    component: () => import('layouts/AuthLayout.vue'),
-    meta: { public: true },
-    children: [
-      {
-        path: '',
-        name: 'AuthPage',
-        component: () => import('pages/AuthPage.vue'),
-      },
-    ],
-  },
-  {
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
-    meta: { requiresAuth: true },
     children: [
       {
         path: '',
-        redirect: '/auth',
+        component: () => import('src/pages/MediaGallery.vue'),
       },
       {
         path: 'gallery',
         component: () => import('src/pages/MediaGallery.vue'),
-      },
-      {
-        path: 'view/:id',
-        component: () => import('pages/MediaItems.vue'),
       },
       {
         path: '/watch/:id',
@@ -40,7 +23,6 @@ const routes = [
         name: 'DocumentViewer',
         component: () => import('pages/DocumentViewerPage.vue'),
       },
-      // Добавляем маршрут для поиска
       {
         path: '/search',
         name: 'search',
@@ -48,7 +30,6 @@ const routes = [
       },
     ],
   },
-
   {
     path: '/:catchAll(.*)*',
     component: () => import('pages/ErrorNotFound.vue'),

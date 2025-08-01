@@ -6,7 +6,7 @@
       class="q-mb-md"
       :options="[
         { label: $t('layout.grid'), value: 'grid', icon: 'grid_view' },
-        { label: $t('layout.list'), value: 'list', icon: 'view_list' },
+        { label: 'Список', value: 'list', icon: 'view_list' },
       ]"
     />
 
@@ -90,13 +90,19 @@
           </q-item>
         </q-list>
       </div>
+      <template v-slot:loading>
+        <div class="row justify-center q-my-md">
+          <q-spinner-dots color="primary" size="40px" />
+        </div>
+      </template>
     </q-infinite-scroll>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useMediaStore } from 'src/stores/useMediaStore'
+import { JellyfinService } from 'src/services/JellyfinService'
 import { format } from 'date-fns'
 import { fetchDetailsBatch } from 'src/utils/fetchDetailsBatch'
 
@@ -114,10 +120,6 @@ const isFetchingMore = ref(false)
 
 const filteredItems = computed(() => allItems.value)
 
-onMounted(() => {
-  console.log('Mounted VideoPanel with folderId:', props.folderId)
-})
-
 watch(
   () => props.folderId,
   () => {
@@ -131,7 +133,7 @@ watch(
 )
 
 async function loadMore(index, done) {
-  if (media.loading || noMoreItems.value || isFetchingMore.value) {
+  if (!JellyfinService.getUserId() || media.loading || noMoreItems.value || isFetchingMore.value) {
     done()
     return
   }
@@ -170,32 +172,6 @@ const formatDate = (date) => format(new Date(date), 'yyyy-MM-dd')
 </script>
 
 <style scoped>
-.fullscreen-video-wrapper {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: black;
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.fullscreen-video {
-  max-width: 100%;
-  max-height: 100%;
-  outline: none;
-}
-
-.close-button {
-  position: fixed;
-  top: 16px;
-  right: 16px;
-  z-index: 10000;
-}
-
 .hover-scale:hover {
   transform: scale(1.02);
   transition: transform 0.2s;

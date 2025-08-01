@@ -37,7 +37,6 @@ onMounted(async () => {
     const downloadUrl = media.getDocumentUrl(id)
 
     url.value = downloadUrl + '&filename=' + encodeURIComponent(docDetails.value.Name) + '.pdf'
-    console.log('PDF URL:', url.value)
 
     filename.value = docDetails.value.Name + '.pdf'
   } catch (e) {

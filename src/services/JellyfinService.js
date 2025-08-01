@@ -1,56 +1,45 @@
 import { api } from 'boot/axios'
 
-const JELLYFIN_API_TOKEN_KEY = 'jellyfin_api_token'
-const JELLYFIN_USER_ID_KEY = 'jellyfin_user_id'
+const JELLYFIN_API_KEY = '207ffa4053e94fb394d6d1ba785ac787'
+
 const JELLYFIN_DEVICE_ID_KEY = 'jellyfin_device_id'
 
-let deviceId = localStorage.getItem(JELLYFIN_DEVICE_ID_KEY) || 'quasar-client-001'
+const deviceId = localStorage.getItem(JELLYFIN_DEVICE_ID_KEY) || 'qainar-client-001'
 if (!localStorage.getItem(JELLYFIN_DEVICE_ID_KEY)) {
   localStorage.setItem(JELLYFIN_DEVICE_ID_KEY, deviceId)
 }
 
 api.defaults.headers['Content-Type'] = 'application/json'
 api.defaults.headers['X-Emby-Authorization'] =
-  `MediaBrowser Client="QuasarApp", Device="Browser", DeviceId="${deviceId}", Version="1.0.0"`
+  `MediaBrowser Client="QainarApp", Device="Browser", DeviceId="${deviceId}", Version="1.0.0"`
 
-let token = localStorage.getItem(JELLYFIN_API_TOKEN_KEY) || ''
-let userId = localStorage.getItem(JELLYFIN_USER_ID_KEY) || ''
+api.defaults.headers['X-MediaBrowser-Token'] = JELLYFIN_API_KEY
 
-if (token) {
-  api.defaults.headers['X-MediaBrowser-Token'] = token
-}
+let userId = ''
 
 export const JellyfinService = {
-  async authenticate(username, password) {
-    api.defaults.headers['X-Emby-Authorization'] =
-      `MediaBrowser Client="QuasarApp", Device="Browser", DeviceId="${deviceId}", Version="1.0.0"`
+  async initializeService() {
+    try {
+      console.log('Инициализация сервиса Jellyfin...')
 
-    const r = await api.post('/Users/AuthenticateByName', { Username: username, Pw: password })
-    const newToken = r.data.AccessToken
-    const newUserId = r.data.User.Id
+      const r = await api.get('/Users')
+      const adminUser = r.data.find((user) => user.Policy?.IsAdministrator)
 
-    token = newToken
-    userId = newUserId
+      if (!adminUser) {
+        throw new Error('Не найден админ пользователь с текущим api key.')
+      }
 
-    localStorage.setItem(JELLYFIN_API_TOKEN_KEY, newToken)
-    localStorage.setItem(JELLYFIN_USER_ID_KEY, newUserId)
-
-    api.defaults.headers['X-MediaBrowser-Token'] = newToken
-
-    return { token: newToken, userId: newUserId }
-  },
-
-  clearAuthData() {
-    token = ''
-    userId = ''
-    localStorage.removeItem(JELLYFIN_API_TOKEN_KEY)
-    localStorage.removeItem(JELLYFIN_USER_ID_KEY)
-    delete api.defaults.headers['X-MediaBrowser-Token']
+      userId = adminUser.Id
+      console.log(`Сервис Jellyfin инициализирован. Админ ID: ${userId}`)
+    } catch (error) {
+      console.error('Ошибка инициализации сервиса Jellyfin:', error)
+      throw new Error(`Ошибка инициализации сервиса Jellyfin: ${error.message}`)
+    }
   },
 
   async getViews() {
-    if (!userId || !token) {
-      throw new Error('Not authenticated. User ID or Token is missing.')
+    if (!userId) {
+      throw new Error('Сервис не инициализирован. Админ ID не определен.')
     }
     const r = await api.get(`/UserViews?userid=${userId}`)
     return r.data
@@ -60,13 +49,13 @@ export const JellyfinService = {
     return userId
   },
 
-  getToken() {
-    return token
+  getApiKey() {
+    return JELLYFIN_API_KEY
   },
 
   async getItemsByParent(parentId, types = 'Video,Audio') {
-    if (!userId || !token) {
-      throw new Error('Not authenticated. User ID or Token is missing.')
+    if (!userId) {
+      throw new Error('Сервис не инициализирован. Админ ID не определен.')
     }
     const r = await api.get(`/Users/${userId}/Items`, {
       params: { ParentId: parentId, IncludeItemTypes: types, Recursive: true },
@@ -83,8 +72,8 @@ export const JellyfinService = {
     fields = ['PrimaryImageAspectRatio', 'SortName', 'Path', 'ChildCount', 'MediaSourceCount'],
     imageTypeLimit = 1,
   }) {
-    if (!userId || !token) {
-      throw new Error('User ID is not set. Please authenticate first.')
+    if (!userId) {
+      throw new Error('Сервис не инициализирован. Админ ID не определен..')
     }
     const r = await api.get(`/Users/${userId}/Items`, {
       params: {
@@ -101,9 +90,6 @@ export const JellyfinService = {
   },
 
   async getPlaylistItems(playlistId) {
-    if (!token) {
-      throw new Error('Not authenticated. Token is missing.')
-    }
     const r = await api.get(`/Playlists/${playlistId}/Items`)
     return r.data.Items
   },
@@ -113,20 +99,20 @@ export const JellyfinService = {
     const type = item.ImageTags?.Primary ? 'Primary' : 'Backdrop'
     if (!tag) return 'src/assets/no-image.png'
 
-    return `${api.defaults.baseURL}/Items/${item.Id}/Images/${type}?tag=${tag}&quality=90&X-MediaBrowser-Token=${token}`
+    return `${api.defaults.baseURL}/Items/${item.Id}/Images/${type}?tag=${tag}&quality=90&api_key=${JELLYFIN_API_KEY}`
   },
 
   getStreamUrl(itemId) {
-    return `${api.defaults.baseURL}/Videos/${itemId}/stream?static=true&X-MediaBrowser-Token=${token}`
+    return `${api.defaults.baseURL}/Videos/${itemId}/stream?static=true&api_key=${JELLYFIN_API_KEY}`
   },
 
   getDocumentUrl(itemId, filename = '') {
-    return `${api.defaults.baseURL}/Items/${itemId}/Download/${filename}?api_key=${token}`
+    return `${api.defaults.baseURL}/Items/${itemId}/Download/${filename}?api_key=${JELLYFIN_API_KEY}`
   },
 
   async searchItems(term, limit = 100) {
-    if (!userId || !token) {
-      throw new Error('Not authenticated. User ID or Token is missing.')
+    if (!userId) {
+      throw new Error('Service not initialized. User ID is missing.')
     }
     const r = await api.get('/Items', {
       params: {
@@ -145,15 +131,15 @@ export const JellyfinService = {
 
   async getItemById(itemId) {
     if (!userId) {
-      throw new Error('User ID is not set. Please authenticate first.')
+      throw new Error('Сервис не инициализирован. Админ ID не определен.')
     }
     const r = await api.get(`/Users/${userId}/Items/${itemId}`)
     return r.data
   },
 
   async updateUserData(itemId, data) {
-    if (!userId || !token) {
-      throw new Error('Not authenticated. User ID or Token is missing.')
+    if (!userId) {
+      throw new Error('Сервис не инициализирован. Админ ID не определен.')
     }
     const r = await api.post(`/UserItems/${itemId}/UserData`, {
       ...data,

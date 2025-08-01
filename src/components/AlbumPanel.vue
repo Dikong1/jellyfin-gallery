@@ -9,7 +9,6 @@
       <q-breadcrumbs-el v-if="selectedViewId" label="Альбом" />
     </q-breadcrumbs>
 
-    <!-- Views -->
     <div v-if="!selectedViewId" class="row q-col-gutter-md q-mb-md">
       <div v-for="v in filteredViews" :key="v.Id" class="col-12 col-sm-6 col-md-4 col-lg-3">
         <q-card class="hover-scale" clickable @click="selectView(v.Id)">
@@ -17,7 +16,6 @@
         </q-card>
       </div>
     </div>
-    <!-- Selected View -->
     <div v-else>
       <q-btn flat icon="arrow_back" @click="goBack" class="q-mb-md" />
       <PhotosPanel :folderId="selectedViewId" />
