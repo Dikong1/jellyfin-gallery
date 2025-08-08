@@ -1,6 +1,6 @@
-# Jellyfin Gallery Demo (test-gallery)
+# Jellyfin Gallery - Custom Frontend for Jellyfin server
 
-Jellyfin test gallery
+Jellyfin gallery
 
 ## Install the dependencies
 ```bash
