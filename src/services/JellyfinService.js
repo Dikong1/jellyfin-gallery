@@ -4,14 +4,14 @@ const JELLYFIN_API_KEY = '207ffa4053e94fb394d6d1ba785ac787'
 
 const JELLYFIN_DEVICE_ID_KEY = 'jellyfin_device_id'
 
-const deviceId = localStorage.getItem(JELLYFIN_DEVICE_ID_KEY) || 'qainar-client-001'
+const deviceId = localStorage.getItem(JELLYFIN_DEVICE_ID_KEY) || 'quasar-client-001'
 if (!localStorage.getItem(JELLYFIN_DEVICE_ID_KEY)) {
   localStorage.setItem(JELLYFIN_DEVICE_ID_KEY, deviceId)
 }
 
 api.defaults.headers['Content-Type'] = 'application/json'
 api.defaults.headers['X-Emby-Authorization'] =
-  `MediaBrowser Client="QainarApp", Device="Browser", DeviceId="${deviceId}", Version="1.0.0"`
+  `MediaBrowser Client="QuasarApp", Device="Browser", DeviceId="${deviceId}", Version="1.0.0"`
 
 api.defaults.headers['X-MediaBrowser-Token'] = JELLYFIN_API_KEY
 
